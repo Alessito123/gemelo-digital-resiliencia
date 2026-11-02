@@ -1,0 +1,14 @@
+{
+  "retraining_matches_original_metrics": true,
+  "ranking_matches_original": true,
+  "api_json_includes_intervals": true,
+  "api_json_includes_36_cells": true,
+  "elapsed_seconds": 25.628,
+  "versions": {
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "pandas": "3.0.3",
+    "numpy": "2.5.3"
+  },
+  "python_version": "3.12.9"
+}

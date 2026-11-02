@@ -1,0 +1,436 @@
+{
+  "scope": "Post hoc exploratory sensitivity analysis; original test previously inspected; original four-model selection unchanged",
+  "seed": 202609,
+  "svr_grid": {
+    "model__C": [
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "model__gamma": [
+      "scale",
+      0.01,
+      0.1
+    ],
+    "model__epsilon": [
+      0.1,
+      0.3
+    ]
+  },
+  "svr_folds": [
+    {
+      "fold": 1,
+      "mae_log": 1.059632942839839,
+      "best_params": {
+        "model__C": 0.1,
+        "model__epsilon": 0.1,
+        "model__gamma": 0.1
+      }
+    },
+    {
+      "fold": 2,
+      "mae_log": 1.239399446006011,
+      "best_params": {
+        "model__C": 0.1,
+        "model__epsilon": 0.1,
+        "model__gamma": 0.01
+      }
+    },
+    {
+      "fold": 3,
+      "mae_log": 1.0804663431991925,
+      "best_params": {
+        "model__C": 1.0,
+        "model__epsilon": 0.1,
+        "model__gamma": "scale"
+      }
+    },
+    {
+      "fold": 4,
+      "mae_log": 0.9098457681830673,
+      "best_params": {
+        "model__C": 0.1,
+        "model__epsilon": 0.3,
+        "model__gamma": 0.1
+      }
+    },
+    {
+      "fold": 5,
+      "mae_log": 1.278171487553756,
+      "best_params": {
+        "model__C": 0.1,
+        "model__epsilon": 0.1,
+        "model__gamma": 0.01
+      }
+    }
+  ],
+  "svr_mean_mae_log": 1.1135031975563732,
+  "svr_sd_mae_log": 0.1486903642913185,
+  "svr_best_params": {
+    "model__C": 1.0,
+    "model__epsilon": 0.3,
+    "model__gamma": 0.1
+  },
+  "svr_test": {
+    "mae_ha": 12.389049736452973,
+    "rmse_ha": 32.23047672472902,
+    "r2": -0.13812110008824097
+  },
+  "training_mean_ha": 12.942065934065933,
+  "training_mean_test": {
+    "mae_ha": 17.363939749905267,
+    "rmse_ha": 30.214811572732007,
+    "r2": -0.00021830175714132594
+  },
+  "test_predictions": [
+    {
+      "row": 18,
+      "observed_ha": 0.0,
+      "svr_ha": 0.5996107755162479,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 19,
+      "observed_ha": 0.0,
+      "svr_ha": 1.5792262506043322,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 20,
+      "observed_ha": 0.0,
+      "svr_ha": 2.2674077328569395,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 51,
+      "observed_ha": 0.0,
+      "svr_ha": 0.2730963004598637,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 52,
+      "observed_ha": 0.0,
+      "svr_ha": 0.4611082575835259,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 53,
+      "observed_ha": 0.0,
+      "svr_ha": 0.34378494391088005,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 54,
+      "observed_ha": 0.0,
+      "svr_ha": 0.6074806788149338,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 55,
+      "observed_ha": 0.0,
+      "svr_ha": 1.0581518379329942,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 56,
+      "observed_ha": 0.0,
+      "svr_ha": 0.0038969744199475478,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 113,
+      "observed_ha": 0.0,
+      "svr_ha": 0.08592290941569158,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 124,
+      "observed_ha": 0.0,
+      "svr_ha": 0.4955906131249347,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 125,
+      "observed_ha": 0.0,
+      "svr_ha": 3.252229763093122,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 126,
+      "observed_ha": 0.0,
+      "svr_ha": 1.0460157194202084,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 132,
+      "observed_ha": 0.0,
+      "svr_ha": 0.23856479150828724,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 133,
+      "observed_ha": 0.0,
+      "svr_ha": 0.6857874935410555,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 137,
+      "observed_ha": 0.43,
+      "svr_ha": 5.1693573856341954,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 145,
+      "observed_ha": 0.96,
+      "svr_ha": 1.2581137085592573,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 159,
+      "observed_ha": 1.9,
+      "svr_ha": 0.6646197450783291,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 172,
+      "observed_ha": 3.5,
+      "svr_ha": 0.44049763856164426,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 173,
+      "observed_ha": 4.53,
+      "svr_ha": 0.7511162851034123,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 186,
+      "observed_ha": 7.4,
+      "svr_ha": 1.1946993111955977,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 207,
+      "observed_ha": 23.41,
+      "svr_ha": 0.6486472369115908,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 219,
+      "observed_ha": 36.85,
+      "svr_ha": 0.8903922455849933,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 229,
+      "observed_ha": 103.39,
+      "svr_ha": 2.3118863895035577,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 254,
+      "observed_ha": 0.68,
+      "svr_ha": 0.5479424257858823,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 293,
+      "observed_ha": 0.9,
+      "svr_ha": 0.5514284159440606,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 301,
+      "observed_ha": 0.0,
+      "svr_ha": 1.4597075485841042,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 317,
+      "observed_ha": 7.21,
+      "svr_ha": 2.3548794969238447,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 319,
+      "observed_ha": 2.18,
+      "svr_ha": 2.053343892267327,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 321,
+      "observed_ha": 0.0,
+      "svr_ha": 1.996336990472392,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 325,
+      "observed_ha": 3.33,
+      "svr_ha": 0.6592089249647843,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 329,
+      "observed_ha": 2.13,
+      "svr_ha": 1.1105306533762782,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 330,
+      "observed_ha": 0.0,
+      "svr_ha": 1.965443657290054,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 331,
+      "observed_ha": 0.0,
+      "svr_ha": 0.47877682236604013,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 342,
+      "observed_ha": 28.19,
+      "svr_ha": 2.9248697591397774,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 355,
+      "observed_ha": 8.12,
+      "svr_ha": 2.060636465694344,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 357,
+      "observed_ha": 3.94,
+      "svr_ha": 0.7349996149275602,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 359,
+      "observed_ha": 2.93,
+      "svr_ha": 1.2019577695661994,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 379,
+      "observed_ha": 42.87,
+      "svr_ha": 0.38574273054358915,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 384,
+      "observed_ha": 28.74,
+      "svr_ha": 0.5812406893980595,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 392,
+      "observed_ha": 3.64,
+      "svr_ha": 0.7172173406891225,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 404,
+      "observed_ha": 7.8,
+      "svr_ha": 1.0255057768277096,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 405,
+      "observed_ha": 0.0,
+      "svr_ha": 1.412043524986227,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 416,
+      "observed_ha": 185.76,
+      "svr_ha": 1.2042238602458712,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 430,
+      "observed_ha": 0.0,
+      "svr_ha": 2.3303727084302817,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 447,
+      "observed_ha": 9.71,
+      "svr_ha": 0.9872059887698041,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 453,
+      "observed_ha": 82.75,
+      "svr_ha": 1.9992365973008264,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 458,
+      "observed_ha": 3.71,
+      "svr_ha": 2.083902041388822,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 460,
+      "observed_ha": 2.14,
+      "svr_ha": 3.2924543521994813,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 467,
+      "observed_ha": 38.48,
+      "svr_ha": 0.04230691559333619,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 468,
+      "observed_ha": 1.94,
+      "svr_ha": 1.8045945228982112,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 470,
+      "observed_ha": 10.08,
+      "svr_ha": 0.6121574611501497,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 472,
+      "observed_ha": 1.76,
+      "svr_ha": 0.5726045656968715,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 473,
+      "observed_ha": 7.36,
+      "svr_ha": 0.7188571528065726,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 477,
+      "observed_ha": 0.0,
+      "svr_ha": 0.9431573852201072,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 500,
+      "observed_ha": 49.59,
+      "svr_ha": 0.5264383992292185,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 508,
+      "observed_ha": 6.44,
+      "svr_ha": 0.43666553793475604,
+      "training_mean_ha": 12.942065934065933
+    },
+    {
+      "row": 511,
+      "observed_ha": 0.0,
+      "svr_ha": 2.370801439329541,
+      "training_mean_ha": 12.942065934065933
+    }
+  ]
+}

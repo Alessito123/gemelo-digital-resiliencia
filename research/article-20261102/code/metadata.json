@@ -1,0 +1,6 @@
+{
+  "name": "Gemelo Digital de Resiliencia en Asentamientos Informales",
+  "description": "Gemelo Digital Poblacional Multi-escala (individuo-barrio-ciudad) para evaluación de resiliencia ante desastres naturales en asentamientos informales del Sur Global.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

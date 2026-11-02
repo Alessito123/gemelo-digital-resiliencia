@@ -1,0 +1,7 @@
+﻿left,right,p_raw,mean_mae_difference,p_holm,significant_at_005
+Base mediana,Ridge,0.625,-0.03799003422409726,1.0,False
+Base mediana,Random Forest,0.8125,-0.024610792003225912,1.0,False
+Base mediana,Gradient Boosting,0.25,0.016200775250178358,1.0,False
+Ridge,Random Forest,1.0,0.013379242220871345,1.0,False
+Ridge,Gradient Boosting,0.625,0.05419080947427561,1.0,False
+Random Forest,Gradient Boosting,0.625,0.04081156725340427,1.0,False

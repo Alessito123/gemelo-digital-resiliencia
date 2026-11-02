@@ -1,0 +1,7 @@
+import React,{createContext,useContext} from 'react';
+export const Locale=createContext({en:false,dark:false});
+export function useText(){const {en}=useContext(Locale);return (es:string,english:string)=>en?english:es;}
+export function Heading({eyebrow,title,children}:{eyebrow:string;title:string;children?:React.ReactNode}){return <header className="page-heading"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1>{children?<p>{children}</p>:null}</header>}
+export function Note({children,error=false}:{children:React.ReactNode;error?:boolean}){return <p className={`notice ${error?'error':''}`} role={error?'alert':'status'}>{children}</p>}
+export function Metric({label,value}:{label:string;value:React.ReactNode}){return <div className="metric"><span>{label}</span><strong>{value}</strong></div>}
+export function Table({rows}:{rows:Record<string,unknown>[]}){const t=useText();if(!rows.length)return <Note>{t('Sin registros.','No records.')}</Note>;const columns=Object.keys(rows[0]);return <div className="table-scroll" tabIndex={0} role="region" aria-label={t('Tabla de datos','Data table')}><table><thead><tr>{columns.map(c=><th scope="col" key={c}>{c}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{columns.map(c=><td key={c}>{typeof r[c]==='number'?Number(r[c]).toLocaleString(undefined,{maximumFractionDigits:4}):typeof r[c]==='object'?JSON.stringify(r[c]):String(r[c]??'—')}</td>)}</tr>)}</tbody></table></div>}
