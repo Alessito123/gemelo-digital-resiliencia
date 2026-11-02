@@ -18,7 +18,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from .research_data import CATEGORICAL, FEATURES, NUMERIC, TARGET, five_folds, load_dataset, split_dataset
+from .research_data import CATEGORICAL, FEATURES, NUMERIC, TARGET, five_folds, load_dataset, split_dataset, partition_manifest
+from .research_uncertainty import cluster_bootstrap_metrics, evaluation_scope
 
 
 def candidates(seed: int):
@@ -63,6 +64,12 @@ def statistical_tests(fold_scores: dict) -> dict:
         pair["significant_at_005"] = previous < .05
     return {
         "friedman": {"statistic": statistic, "p_value": pvalue},
+        "kendall_w": float(statistic/(len(arrays[0])*(len(names)-1))),
+        "inference_limits": {
+            "paired_folds": len(arrays[0]), "folds_share_training": True,
+            "power_estimated": False,
+            "minimum_two_sided_exact_wilcoxon_p_no_zeros": float(2./2**len(arrays[0])),
+            "note": "The minimum p assumes independent nonzero pairs and an exact two-sided test; it is a resolution bound, not a power estimate."},
         "wilcoxon_holm": pairs,
         "interpretation": "Exploratorio: cinco folds comparten entrenamiento; los p-valores no prueban superioridad general. Holm corrige las seis comparaciones. No significancia no implica equivalencia.",
     }
@@ -127,7 +134,8 @@ def train_experiment(seed: int = 202609, progress=None):
         "statistics": statistical_tests(scores),
         "residual_shapiro": {"statistic": float(normality.statistic), "p_value": float(normality.pvalue),
                              "interpretation": "Diagnóstico de normalidad de residuos log; no mide calidad predictiva."},
-        "test_predictions": [{"row": int(row), "observed_ha": float(actual), "predicted_ha": float(pred)}
+        "test_predictions": [{"row": int(row), "X": int(frame.iloc[row].X), "Y": int(frame.iloc[row].Y),
+                              "group": str(groups.iloc[row]), "observed_ha": float(actual), "predicted_ha": float(pred)}
                              for row, actual, pred in zip(test, observed, predicted)],
         "versions": {name: version(name) for name in ["scikit-learn", "scipy", "pandas", "numpy"]},
         "python_version": platform.python_version(),
@@ -140,5 +148,8 @@ def train_experiment(seed: int = 202609, progress=None):
             "Las estimaciones del gemelo poblacional siguen siendo sintéticas y no se calibran automáticamente con incendios.",
         ],
     }
+    report["partition_manifest"] = partition_manifest(frame, development, test, groups)
+    report["test_uncertainty"] = cluster_bootstrap_metrics(observed, predicted, groups.iloc[test], seed=seed)
+    report["evaluation_scope"] = evaluation_scope(report["test_metrics"])
     notify(1., "Experimento completado")
     return report, final_search.best_estimator_

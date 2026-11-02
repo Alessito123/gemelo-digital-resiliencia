@@ -1,7 +1,8 @@
 """Cliente HTTP usado por Streamlit; la computación vive en FastAPI."""
 import requests
+from python_connection import API_URL
 
-API = "http://127.0.0.1:8000"
+API = API_URL
 
 
 def api_request(method: str, path: str, payload=None):

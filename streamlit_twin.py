@@ -17,6 +17,7 @@ def render_twin():
             tr("Un barrio. Muchas decisiones.","One neighborhood. Many decisions."),
             tr("Configura una amenaza y explora cómo cambia el estado de los hogares con el tiempo.",
                "Choose a hazard and explore how household states change over time."))
+    st.caption(tr("TU RECORRIDO · 1 Configura → 2 Explora en 3D → 3 Interpreta → 4 Exporta", "YOUR PATH · 1 Configure → 2 Explore in 3D → 3 Interpret → 4 Export"))
     with st.expander(tr("1 · Configurar el escenario","1 · Configure the scenario"),expanded="workflow_result" not in st.session_state):
         with st.form("twin_config"):
             left,right=st.columns(2)
@@ -50,7 +51,7 @@ def render_twin():
             with st.spinner(tr("Calculando las decisiones de los hogares…","Calculating household decisions…")):
                 st.session_state.workflow_result=WorkflowResult.model_validate(api_request("POST","/api/simulation/runs",payload))
         except (ValueError,requests.RequestException):
-            st.error(tr("No se pudo ejecutar. Comprueba FastAPI en el puerto 8000.","Unable to run. Check FastAPI on port 8000."))
+            st.error(tr("No se pudo ejecutar. Inicia el proyecto con run_python.py y vuelve a intentarlo.","Unable to run. Start the project with run_python.py and retry."))
             return
     result=st.session_state.workflow_result
     sim=result.simulation
@@ -58,18 +59,36 @@ def render_twin():
     spatial,summary,trace,evidence=st.tabs([tr("2 · Explorar en 3D","2 · Explore in 3D"),tr("3 · Entender resultados","3 · Understand results"),
                                           tr("Cómo se calculó","How it was calculated"),tr("Exportar y protocolo","Export and protocol")])
     with spatial:
+        st.subheader(tr("La respuesta, hogar por hogar", "The response, household by household"))
+        st.write(tr("1. Elige una vista. 2. Recorre el tiempo. 3. Localiza un hogar para conocer su estado.",
+                    "1. Choose a view. 2. Move through time. 3. Locate a household to inspect its state."))
+        camera_col,layer_col=st.columns([2,1])
+        camera=camera_col.radio(tr("Vista de la maqueta", "Model view"),["perspective","top","street"],horizontal=True,
+            format_func=lambda x:{"perspective":tr("Perspectiva", "Perspective"),"top":tr("Desde arriba", "From above"),
+                                  "street":tr("A nivel de barrio", "Neighborhood level")}[x],key="twin_camera")
+        context=layer_col.checkbox(tr("Mostrar calles esquemáticas", "Show schematic streets"),True,key="twin_context")
         step=st.slider(tr("Recorre el tiempo de la simulación","Move through simulation time"),0,len(sim.history)-1,0,key="scene_"+result.execution_id)
         point=sim.history[step]
         a,b,c=st.columns(3)
         a.metric(tr("Tiempo simulado","Simulated time"),f"{point.time_min:g} min")
         b.metric(tr("Hogares a salvo","Safe households"),f"{point.safe_households}/{sim.metrics.total_households}")
         c.metric(tr("Hogares atrapados","Trapped households"),point.trapped_households)
-        st.plotly_chart(scene_figure(sim,step,st.session_state.get("language","es"),dark()),width="stretch",theme=None,key="twin_scene",
-                        config={"displaylogo":False,"scrollZoom":True})
+        states=point.household_states
+        selected=st.selectbox(tr("Localizar hogar", "Locate household"),[None]+list(range(sim.metrics.total_households)),
+            format_func=lambda i:tr("Vista general · todos los hogares", "Overview · all households") if i is None else
+                f"H{i+1:03d} · {LABELS[st.session_state.get('language','es')][states[i] if states else 'exposed']}",
+            key="inspect_"+sim.settlement_id)
+        st.plotly_chart(scene_figure(sim,step,st.session_state.get("language","es"),dark(),camera,context,selected),width="stretch",theme=None,key="twin_scene",
+                        config={"displaylogo":False,"scrollZoom":True,"toImageButtonOptions":{"format":"png","width":4000,"height":2800,"scale":1}})
         st.caption(tr("Arrastra para girar · rueda para acercar · pasa el cursor sobre un hogar para ver su estado.",
                       "Drag to rotate · scroll to zoom · hover over a household to inspect its state."))
-        st.info(tr("Terreno y edificios esquemáticos, no georreferenciados. Cada estado proviene del motor; esta vista no es una reconstrucción real del barrio.",
-                   "Schematic terrain and buildings, not georeferenced. States come from the engine; this is not a real reconstruction of the neighborhood."))
+        st.caption(tr("Interpretación: cada vivienda conserva su ID y toma su color de household_states en el paso seleccionado. Safe/total × 100 produce la evacuación; injured tiene prioridad visual sobre trapped, por lo que ambos conteos no deben sumarse como categorías independientes. Techos, ventanas y curvas de nivel son representación esquemática.", "Interpretation: each dwelling retains its ID and takes its colour from household_states at the selected step. Safe/total × 100 gives evacuation; injured takes visual priority over trapped, so these counts must not be added as independent categories. Roofs, windows and contours are schematic."))
+        st.caption(f"Source: simulation.history[{step}] · t={point.time_min:g} min · seed={sim.config.seed} · run={result.execution_id}")
+        if selected is not None:
+            st.success(tr(f"Hogar H{selected+1:03d} localizado en la maqueta. Estado al minuto {point.time_min:g}: {LABELS['es'][states[selected] if states else 'exposed']}.",
+                          f"Household H{selected+1:03d} marked in the model. State at minute {point.time_min:g}: {LABELS['en'][states[selected] if states else 'exposed']}."))
+        st.info(tr("Maqueta sintética: terreno, edificios y calles son esquemáticos. Las calles dibujadas no representan rutas de evacuación calculadas. Los estados de los hogares sí provienen del motor.",
+                   "Synthetic model: terrain, buildings and streets are schematic. Drawn streets do not represent computed evacuation routes. Household states come from the engine."))
         with st.expander(tr("Ver los mismos estados en una tabla","View the same states as a table")):
             st.dataframe(pd.DataFrame({tr("Hogar","Household"):[f"H{i+1:03d}" for i in range(len(point.household_states))],
                                       tr("Estado","State"):[LABELS[st.session_state.get("language","es")][x] for x in point.household_states]}),hide_index=True,width="stretch")
@@ -86,9 +105,11 @@ def render_twin():
         figure.add_trace(go.Scatter(x=[p.time_min for p in sim.history],y=[p.evacuation_rate_pct for p in sim.history],name=tr("Evacuación (%)","Evacuation (%)"),line={"color":"#888","width":3}))
         figure.add_trace(go.Scatter(x=[p.time_min for p in sim.history],y=[p.resilience_index for p in sim.history],name=tr("Resiliencia","Resilience"),line={"dash":"dot","width":3}))
         figure.update_xaxes(title=tr("Minutos","Minutes"))
-        st.plotly_chart(chart_theme(figure),theme=None,width="stretch")
+        st.plotly_chart(chart_theme(figure),theme=None,width="stretch",config={"toImageButtonOptions":{"format":"png","width":4000,"height":2400,"scale":1}})
         st.caption(tr("Una puntuación más alta indica mejor respuesta dentro de este modelo, no una medición validada del barrio.",
                       "A higher score indicates a better response within this model, not a validated measurement of the neighborhood."))
+        st.caption(tr("Explicación: la evacuación es el porcentaje de hogares a salvo. La resiliencia es clip(100 − daño sintético + 18 × fracción a salvo + amortiguación social + 0,08 × respuesta institucional, 0, 100). Comparten escala 0–100, pero tienen unidades y significados distintos. Una trayectoria no demuestra causalidad ni robustez entre semillas.", "Explanation: evacuation is the percentage of safe households. Resilience is clip(100 − synthetic damage + 18 × safe fraction + social buffer + 0.08 × institutional response, 0, 100). Both use a 0–100 scale but have different units and meanings. One trajectory does not establish causality or robustness across seeds."))
+        st.caption(f"Source: simulation.history → simulation.metrics · seed={sim.config.seed} · run={result.execution_id}")
         st.write(tr("Prueba aumentar el tiempo de alerta o activar el apoyo vecinal y compara una nueva ejecución.",
                     "Try increasing warning time or enabling neighborhood support, then compare a new run."))
         st.header(tr("Dónde se concentra la fragilidad","Where fragility concentrates"))

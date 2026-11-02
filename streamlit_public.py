@@ -31,6 +31,7 @@ def render_public():
         st.dataframe(frame,width="stretch",hide_index=True)
         if "lat" in frame and "lon" in frame: st.map(frame[["lat","lon"]])
         if "precipitation_mm_day" in frame: st.line_chart(frame.set_index("date")["precipitation_mm_day"])
+        st.caption(tr("Interpretación y trazabilidad: tabla y mapa utilizan los mismos registros descargados; el mapa sitúa coordenadas, sin modelar exposición o riesgo. La serie de lluvia usa fecha y precipitación del producto consultado; faltantes no equivalen a cero. Conserva el JSON con fuente, fecha de descarga y licencia para reproducir la consulta. Las fuentes pueden actualizarse.", "Interpretation and traceability: table and map use the same retrieved records; the map places coordinates without modelling exposure or risk. Rainfall uses dates and precipitation from the queried product; missing values are not zero. Retain the JSON source, retrieval time and license to reproduce the query. Sources can change."))
         st.caption(snapshot["license"])
         st.link_button(tr("Fuente original","Original source"),snapshot["source"])
         st.download_button(tr("Descargar datos JSON","Download JSON data"),json.dumps(snapshot,ensure_ascii=False,indent=2),"public-data.json","application/json")

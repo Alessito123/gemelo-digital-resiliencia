@@ -71,6 +71,25 @@ def five_folds(features: pd.DataFrame, groups):
     return list(GroupKFold(n_splits=5).split(features, groups=groups))
 
 
+def partition_manifest(frame, development, test, groups):
+    """Expose the original UCI cell labels; do not assign invented metric sizes."""
+    dev, held = set(map(int, development)), set(map(int, test))
+    if dev & held or dev | held != set(range(len(frame))):
+        raise ValueError("Development and test must be a disjoint exhaustive row partition")
+    if set(groups.iloc[development]) & set(groups.iloc[test]):
+        raise ValueError("A spatial cell occurs in both development and test")
+    cells = []
+    for (x, y), indices in frame.groupby(["X", "Y"], sort=True).groups.items():
+        rows = list(map(int, indices))
+        cells.append({"X": int(x), "Y": int(y), "rows": len(rows),
+                      "split": "test" if rows[0] in held else "development"})
+    return {"definition": "Exact equality of the original discrete UCI X and Y labels",
+            "metric_cell_size": None, "metric_size_note": "No kilometre dimensions are inferred from X/Y labels",
+            "development_rows": sorted(dev), "test_rows": sorted(held), "cells": cells,
+            "development_pct": 100*len(dev)/len(frame), "test_pct": 100*len(held)/len(frame),
+            "disjoint_cells": True}
+
+
 def explore_dataset(seed: int = 202609) -> dict:
     frame, metadata = load_dataset()
     development, test, groups = split_dataset(frame, seed)

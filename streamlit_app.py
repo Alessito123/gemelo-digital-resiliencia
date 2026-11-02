@@ -6,8 +6,9 @@ from streamlit_twin import render_twin
 from streamlit_research import render_research
 from streamlit_public import render_public
 from streamlit_chat import render_chat, render_floating_chat
+from streamlit_guide import render_guide
 
-PAGES={"home":("Inicio","Home"),"twin":("Gemelo 3D","Digital twin 3D"),
+PAGES={"home":("Inicio","Home"),"guide":("Guía para sustentar","Defense guide"),"twin":("Gemelo 3D","Digital twin 3D"),
        "research":("Investigación","Research"),"data":("Datos públicos","Public data"),"assistant":("Asistente","Assistant")}
 
 def navigate(page):
@@ -19,6 +20,8 @@ def render_home():
             tr("Un espacio para explorar un barrio, experimentar con datos y entender qué dicen los resultados. Empieza por una pregunta, no por una fórmula.",
                "A place to explore a neighborhood, experiment with data and understand the results. Start with a question, not a formula."))
     st.divider()
+    st.button(tr("¿Dónde está lo que pide mi docente? →", "Where are my instructor’s requirements? →"),
+              on_click=navigate,args=("guide",),width="stretch",type="primary")
     cards=[
         ("01",tr("Explora un barrio","Explore a neighborhood"),tr("Observa hogares en 3D y descubre cómo responden ante una amenaza.","See households in 3D and explore how they respond to a hazard."),"twin"),
         ("02",tr("Pon a prueba los datos","Test the data"),tr("Entrena modelos con registros reales y compara su desempeño paso a paso.","Train models on real records and compare their performance step by step."),"research"),
@@ -49,7 +52,7 @@ def main():
         st.divider()
         st.caption(tr("Explora → compara → comprende","Explore → compare → understand"))
         st.caption(tr("Herramienta académica. Resultados sujetos a los límites del modelo.","Academic tool. Results depend on model limitations."))
-    {"home":render_home,"twin":render_twin,"research":render_research,"data":render_public,"assistant":render_chat}[page]()
+    {"home":render_home,"guide":render_guide,"twin":render_twin,"research":render_research,"data":render_public,"assistant":render_chat}[page]()
     render_floating_chat()
 
 if __name__=="__main__":

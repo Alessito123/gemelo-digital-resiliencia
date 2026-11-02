@@ -38,14 +38,19 @@ def render_results(run_id,result):
     st.header(tr("El resultado, explicado","The result, explained"))
     st.write(tr("Modelo seleccionado: ","Selected model: ")+display_model(result["winner"]))
     st.caption(tr("Se elige por menor error en validación; no es una garantía de precisión.","Selection uses the lowest validation error; it is not a guarantee of accuracy."))
-    summary,detail,statistics,prediction=st.tabs([tr("Comparar","Compare"),tr("5 folds y parámetros","5 folds & parameters"),tr("Estadística","Statistics"),tr("Predecir","Predict")])
-    with summary:
+    views={"compare":tr("Comparar","Compare"),"folds":tr("5 folds y parámetros","5 folds & parameters"),
+           "statistics":tr("Estadística","Statistics"),"predict":tr("Predecir","Predict")}
+    view=st.radio(tr("Evidencia del experimento", "Experiment evidence"),list(views),
+                  format_func=views.get,horizontal=True,key="research_view")
+    if view=="compare":
         rank=pd.DataFrame(result["ranking"])
         rank["model"]=rank["model"].map(display_model)
         st.table(rank.rename(columns={"model":tr("Modelo","Model"),"mean_mae_log":tr("Error medio · menor es mejor","Mean error · lower is better"),"std_mae_log":tr("Variación","Variation")}).round(4))
         frame=pd.DataFrame(result["fold_results"])
         frame["model"]=frame["model"].map(display_model)
-        st.plotly_chart(chart_theme(px.box(frame,x="model",y="mae_log",points="all",labels={"model":tr("Modelo","Model"),"mae_log":tr("Error logarítmico","Log error")})),theme=None,width="stretch")
+        st.plotly_chart(chart_theme(px.box(frame,x="model",y="mae_log",points="all",labels={"model":tr("Modelo","Model"),"mae_log":tr("Error logarítmico","Log error")})),theme=None,width="stretch",config={"toImageButtonOptions":{"format":"png","width":4000,"height":2400,"scale":1}})
+        st.caption(tr("Lectura: cada punto es un fold externo; el ranking resume esos mismos cinco errores por modelo con media y desviación estándar. Menor MAE log es mejor. La dispersión no es un intervalo de confianza ni explica causalmente las predicciones.", "Reading: each point is an outer fold; the ranking summarises those same five errors per model using mean and standard deviation. Lower log MAE is better. Spread is not a confidence interval or a causal explanation."))
+        st.caption(f"Source: fold_results → ranking · seed={result['seed']} · run={run_id} · JSON export")
         m=result["test_metrics"]
         a,b,c=st.columns(3)
         a.metric(tr("Error medio (ha)","Mean error (ha)"),f"{m['mae_ha']:.3f}")
@@ -54,22 +59,24 @@ def render_results(run_id,result):
         st.info(tr("MAE: cuánto se equivoca en promedio. RMSE: penaliza más los errores grandes. R² negativo: peor que usar la media de prueba. Estas métricas se calculan en datos reservados.",
                    "MAE: average prediction error. RMSE: penalizes large errors more. Negative R²: worse than the test-set mean. These metrics use held-out data."))
         observed=pd.DataFrame(result["test_predictions"])
-        st.plotly_chart(chart_theme(px.scatter(observed,x="observed_ha",y="predicted_ha",labels={"observed_ha":tr("Área real (ha)","Observed area (ha)"),"predicted_ha":tr("Área estimada (ha)","Predicted area (ha)")})),theme=None,width="stretch")
-    with detail:
+        st.plotly_chart(chart_theme(px.scatter(observed,x="observed_ha",y="predicted_ha",labels={"observed_ha":tr("Área real (ha)","Observed area (ha)"),"predicted_ha":tr("Área estimada (ha)","Predicted area (ha)")})),theme=None,width="stretch",config={"toImageButtonOptions":{"format":"png","width":4000,"height":2400,"scale":1}})
+        st.caption(tr("Lectura: cada punto compara el área observada y la predicha en prueba. Coincidirían sobre y=x; separarse de esa línea indica error. Los errores en hectáreas pueden ser grandes aunque el MAE log de validación sea menor. No se estiman efectos de variables ni evacuación urbana.", "Reading: each point pairs observed and predicted test area. Agreement lies on y=x; departures indicate error. Errors in hectares may remain large despite lower validation log MAE. This does not estimate feature effects or urban evacuation."))
+        st.caption(f"Source: test_predictions → test_metrics · n={len(result['test_predictions'])} · run={run_id}")
+    if view=="folds":
         st.write(tr("Cada modelo pasa por cinco evaluaciones externas. Dentro de cada una, cinco particiones buscan los mejores parámetros.","Each model undergoes five outer evaluations. Within each, five inner splits find the best parameters."))
         st.dataframe(pd.DataFrame(result["fold_results"]),hide_index=True,width="stretch")
         st.write(tr("Parámetros finales","Final parameters"))
         st.json(result["best_params"])
         with st.expander(tr("Todas las búsquedas (campos técnicos originales)","All searches (original technical fields)")):
             st.dataframe(pd.DataFrame(result["hyperparameter_search"]),hide_index=True,width="stretch")
-    with statistics:
+    if view=="statistics":
         st.write(tr("Friedman compara los cuatro modelos. Wilcoxon compara pares; Holm corrige las comparaciones múltiples.","Friedman compares all four models. Wilcoxon compares pairs; Holm adjusts for multiple comparisons."))
         st.metric("Friedman · p",f"{result['statistics']['friedman']['p_value']:.4f}")
         st.dataframe(pd.DataFrame(result["statistics"]["wilcoxon_holm"]),hide_index=True,width="stretch")
         st.info(tr("Cinco folds tienen poca potencia y comparten entrenamiento. No encontrar significancia no demuestra que los modelos sean equivalentes.","Five folds have low power and share training data. A non-significant result does not prove equivalence."))
         st.write(tr("Shapiro–Wilk evalúa normalidad de los residuos, no calidad predictiva.","Shapiro–Wilk checks residual normality, not predictive quality."))
         st.json(result["residual_shapiro"] if st.session_state.language=="es" else {k:v for k,v in result["residual_shapiro"].items() if k!="interpretation"})
-    with prediction:
+    if view=="predict":
         try:
             example=fetch_dataset(result["seed"])["preview"][0]
         except (ValueError,requests.RequestException):
@@ -94,6 +101,7 @@ def render_results(run_id,result):
                 st.metric(tr("Área estimada","Estimated area"),f"{answer['predicted_area_ha']:.3f} ha")
             except (ValueError,requests.RequestException):
                 st.error(tr("Modelo no disponible o valores inválidos. Si reiniciaste el servidor, vuelve a entrenar.","Model unavailable or invalid values. Retrain if the server was restarted."))
+    st.caption(tr("Reproducibilidad: conserva ID, semilla, hash del dataset, versiones, particiones, parámetros y predicciones del JSON. El mismo número de semilla requiere también las mismas versiones y datos. La interpretación del ranking explica la selección; no equivale a SHAP, importancia por permutación ni explicación local del predictor.", "Reproducibility: retain the JSON run ID, seed, dataset hash, versions, splits, parameters and predictions. Reusing a seed also requires the same versions and data. Ranking interpretation explains selection; it is not SHAP, permutation importance or a local predictor explanation."))
     st.download_button(tr("Descargar informe JSON","Download JSON report"),json.dumps(result,ensure_ascii=False,indent=2),f"research-{run_id}.json","application/json")
     st.caption(tr("El informe conserva campos y textos técnicos originales.","The report preserves original technical fields and source text."))
 
@@ -103,6 +111,9 @@ def render_research():
     seed=int(st.number_input(tr("Semilla · usa la misma para repetir resultados","Seed · use the same value to repeat results"),min_value=1,max_value=2147483647,value=202609,key="research_seed"))
     step=st.radio(tr("Tu siguiente paso","Your next step"),["method","data","train"],horizontal=True,
                   format_func=lambda x:{"method":tr("1 · Comprender","1 · Understand"),"data":tr("2 · Explorar datos","2 · Explore data"),"train":tr("3 · Entrenar","3 · Train")}[x],key="research_step")
+    st.caption({"method":tr("ESTÁS AQUÍ · CRISP-DM / metodología", "YOU ARE HERE · CRISP-DM / methodology"),
+                "data":tr("ESTÁS AQUÍ · Dataset real / EDA / preparación", "YOU ARE HERE · Real dataset / EDA / preparation"),
+                "train":tr("ESTÁS AQUÍ · Entrenamiento / 5 × 5 folds / mejor modelo / estadística / FastAPI", "YOU ARE HERE · Training / 5 × 5 folds / best model / statistics / FastAPI")}[step])
     if step=="method":
         st.info(tr("UCI Forest Fires contiene incendios observados en Portugal. El objetivo es estimar área quemada; no mide la resiliencia de hogares informales.",
                    "UCI Forest Fires contains observed fires in Portugal. The goal is to estimate burned area; it does not measure informal household resilience."))
@@ -125,8 +136,10 @@ def render_research():
             c.metric(tr("Reservados para prueba","Held out for testing"),data["test_rows"])
             st.caption(tr("Se muestran solo datos de desarrollo. Cuatro duplicados exactos fueron retirados.","Only development data are shown. Four exact duplicates were removed."))
             st.dataframe(pd.DataFrame(data["preview"]),width="stretch",hide_index=True)
-            st.plotly_chart(chart_theme(px.histogram(x=np.log1p(data["target_values"]),nbins=30,labels={"x":tr("Área quemada · escala log","Burned area · log scale")})),theme=None,width="stretch")
-            st.plotly_chart(chart_theme(px.imshow(pd.DataFrame(data["correlations"]),zmin=-1,zmax=1,color_continuous_scale="Greys",title=tr("Cómo se relacionan las variables","How variables relate"))),theme=None,width="stretch")
+            st.plotly_chart(chart_theme(px.histogram(x=np.log1p(data["target_values"]),nbins=30,labels={"x":tr("Área quemada · escala log","Burned area · log scale")})),theme=None,width="stretch",config={"toImageButtonOptions":{"format":"png","width":4000,"height":2400,"scale":1}})
+            st.caption(tr("Lectura: las barras cuentan registros de desarrollo en intervalos de log1p(área en ha). La transformación comprime áreas grandes; los datos de prueba no se muestran. Fuente: target_values; semilla y hash en metadatos.", "Reading: bars count development records in log1p(area in ha) bins. The transformation compresses large areas; test data are not shown. Source: target_values; seed and hash in metadata."))
+            st.plotly_chart(chart_theme(px.imshow(pd.DataFrame(data["correlations"]),zmin=-1,zmax=1,color_continuous_scale="Greys",title=tr("Cómo se relacionan las variables","How variables relate"))),theme=None,width="stretch",config={"toImageButtonOptions":{"format":"png","width":4000,"height":2400,"scale":1}})
+            st.caption(tr("Lectura: cada celda es una correlación de Pearson entre variables numéricas de desarrollo, entre −1 y 1. Una asociación no demuestra causalidad ni importancia predictiva; las variables categóricas no se incluyen. Fuente: correlations; el JSON conserva el ámbito de desarrollo.", "Reading: each cell is a Pearson correlation between numeric development variables, from −1 to 1. Association does not establish causality or predictive importance; categorical variables are excluded. Source: correlations; JSON records the development-only scope."))
             with st.expander(tr("Resumen estadístico","Statistical summary")):
                 st.dataframe(pd.DataFrame(data["summary"]),width="stretch")
             st.link_button(tr("Ver fuente y licencia UCI","View UCI source and license"),"https://archive.ics.uci.edu/dataset/162/forest+fires")
@@ -149,6 +162,9 @@ def render_research():
                 if recent: st.session_state.ml_run_id=recent[-1]["id"]
             except (ValueError,requests.RequestException): pass
         st.write(tr("Comparamos una referencia simple, Ridge, Random Forest y Gradient Boosting. El entrenamiento puede tardar unos minutos.","We compare a simple baseline, Ridge, Random Forest and Gradient Boosting. Training may take a few minutes."))
+        if not st.session_state.get("ml_result"):
+            st.info(tr("Para ver el ranking, los cinco folds, los hiperparámetros y las pruebas estadísticas, pulsa «Entrenar y comparar» y espera a que termine. Aparecerán debajo del progreso.",
+                       "To see the ranking, five folds, hyperparameters and statistical tests, press ‘Train and compare’ and wait for completion. They will appear below the progress indicator."))
         if st.button(tr("Entrenar y comparar","Train and compare"),type="primary"):
             try:
                 job=api_request("POST","/api/ml/runs",{"seed":seed})

@@ -1,19 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import App from './reactApp/Platform.tsx';
 import { AppErrorBoundary } from './components/AppErrorBoundary.tsx';
-import { LanguageProvider } from './context/LanguageContext.tsx';
-import { ThemeProvider } from './context/ThemeContext.tsx';
-import './index.css';
+import './reactApp/platform.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppErrorBoundary>
-      <ThemeProvider>
-        <LanguageProvider>
           <App />
-        </LanguageProvider>
-      </ThemeProvider>
     </AppErrorBoundary>
   </StrictMode>,
 );

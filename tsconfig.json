@@ -1,4 +1,6 @@
 {
+  "include": ["src/**/*.ts", "src/**/*.tsx", "server.ts", "vite.config.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".venv-streamlit", "output", "src/App.tsx"],
   "compilerOptions": {
     "target": "ES2022",
     "experimentalDecorators": true,

@@ -10,3 +10,12 @@ coverage/
 __pycache__/
 *.pyc
 .streamlit/secrets.toml
+.playwright-cli/
+output/
+.venv/
+.venv-*/
+*.xlsx
+*.docx
+*.pdf
+({html
+tasks/

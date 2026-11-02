@@ -1,18 +1,71 @@
 # Gemelo de resiliencia comunitaria
 
-## Aplicación principal: Python + Streamlit + FastAPI
+**Explorar un barrio, comparar escenarios y comprender la evidencia.** Una plataforma académica con gemelo poblacional 3D, laboratorio de aprendizaje automático y datos públicos trazables.
 
-La entrada actual es `run_python.py`. La interfaz, el motor de simulación, LangGraph, el laboratorio de aprendizaje automático y las consultas públicas funcionan en Python. No requiere Node para este flujo. El código React anterior se conserva como referencia.
+![Gemelo poblacional 3D: vista ilustrativa de hogares y estados de evacuación](docs/media/gemelo-3d.png)
+
+**[Abrir presentación visual para el docente](https://alessito123.github.io/gemelo-digital-resiliencia/)** · **[Guía de demostración](docs/PRESENTACION-DOCENTE.md)** · [Alcance de la revisión](docs/COTEJO-REVISION-Y-EXPORTACION-20261026.md)
+
+## Qué puedes hacer
+
+| Espacio | Qué hace la aplicación | Qué puedes mostrar en una sustentación |
+|---|---|---|
+| **Gemelo 3D** | Simula la respuesta de hogares ante inundación, terremoto, deslizamiento o evento compuesto. | Escenario, evolución temporal, hogares y protocolos derivados. |
+| **Investigación** | Recorre CRISP-DM con datos reales de UCI Forest Fires: EDA, entrenamiento y comparación de cuatro modelos. | Cinco folds externos y cinco internos, hiperparámetros, predicciones y diagnósticos estadísticos. |
+| **Datos públicos** | Consulta USGS, NASA POWER y OpenStreetMap con fuente y procedencia. | Contexto sísmico, precipitación e infraestructura; no censos individuales. |
+| **Exportaciones** | Descarga tablas en Excel e imágenes en alta resolución. | Datos, explicación, interpretación y fuente para los informes. |
+| **Guía y asistente** | Ubica requisitos académicos y explica resultados con herramientas locales. | Una ruta de demostración y límites explícitos del modelo. |
+
+## Así se ve
+
+### Un punto de entrada para entender el proyecto
+
+![Inicio de la aplicación con accesos al gemelo, investigación y guía](docs/media/inicio.png)
+
+### Resultados que se pueden explicar y exportar
+
+![Comparación de modelos con explicación, interpretación y descarga de Excel](docs/media/resultados.png)
+
+Las capturas corresponden a la aplicación local. La escena 3D representa hogares sintéticos; el laboratorio utiliza un benchmark observado de incendios de Portugal. Son dos tipos de evidencia distintos.
+
+## Recorrido para el docente
+
+1. **Inicio:** conoce el propósito y los espacios de trabajo.
+2. **Gemelo 3D:** configura una amenaza, simula y explora hogares y estados.
+3. **Investigación:** revisa EDA, entrenamiento, comparación y pruebas estadísticas.
+4. **Datos públicos:** consulta las fuentes y su procedencia.
+5. **Guía para sustentar:** contrasta cada requisito con su evidencia y pendientes.
+
+La interfaz permite español/inglés, apariencia blanca/negra y un asistente flotante. El motor se ejecuta en Python con FastAPI y LangGraph; el frontend es React.
+
+## Qué significan los resultados
+
+Es un **prototipo de investigación**, con validación científica parcial. El experimento documentado obtuvo R² de prueba **−0.1576** y Friedman **p ≈ 0.771**: no demuestra utilidad operativa ni superioridad estadística entre los modelos. La escena 3D no es una reconstrucción geográfica validada. Los estudios con usuarios, calibración territorial y revisión del manuscrito siguen pendientes.
+
+La presentación web es estática. GitHub Pages puede mostrar esta galería, pero no ejecuta el backend Python. La aplicación completa requiere el servidor descrito en la instalación.
+
+<details>
+<summary><strong>Instalación, arquitectura y documentación técnica</strong></summary>
+
+## Aplicación principal: React + FastAPI + Python
+
+La entrada actual es `run_react.py`. React/TypeScript presenta la interfaz y Three.js la maqueta 3D. FastAPI ejecuta el motor Python, LangGraph, el laboratorio scikit-learn y las consultas públicas. El cliente no reimplementa entrenamiento ni decisiones de simulación. Streamlit (`run_python.py`, puerto 8501) y el frontend anterior (`src/App.tsx`) se conservan como referencias.
 
 ```powershell
 python -m venv .venv-streamlit
 .venv-streamlit\Scripts\python.exe -m pip install --only-binary=:all: pip==26.2.1
 .venv-streamlit\Scripts\python.exe -m pip install --only-binary=:all: -r requirements-streamlit.txt
-.venv-streamlit\Scripts\python.exe run_python.py
+.venv-streamlit\Scripts\python.exe run_react.py
 ```
 
-- Interfaz: http://127.0.0.1:8501
-- API documentada: http://127.0.0.1:8000/docs
+- Interfaz React: http://127.0.0.1:5178
+- API documentada: http://127.0.0.1:8010/docs
+
+Requiere Node/npm y las dependencias del `package-lock.json` además del entorno Python. La API usa 8010 y Vite 5178. Puedes configurarlos mediante `GEMELO_API_PORT` y `GEMELO_WEB_PORT` antes de iniciar el lanzador. Vite reenvía `/api` a FastAPI; no se necesitan credenciales ni CORS abierto.
+
+Para una compilación local servida íntegramente por FastAPI: `npm run build`, seguido de `.venv-streamlit\Scripts\python.exe run_react.py --production`. La interfaz compilada abre en http://127.0.0.1:8010 y sus rutas usan fragmentos (`#twin`, `#guide`, `#research`). `npm run dev` inicia solo Vite; requiere la API activa. `npm run dev:legacy` conserva el servidor Express histórico y no es el flujo principal.
+
+En **Guía para sustentar** encontrarás accesos a los diez requisitos del docente. **Gemelo 3D** ofrece una maqueta con relieve y cubiertas, tres cámaras, calles esquemáticas opcionales y un selector para localizar hogares. El terreno y las calles siguen siendo ilustrativos, no cartografía observada ni rutas calculadas.
 - Pruebas: `.venv-streamlit\Scripts\python.exe -m unittest discover -s python_tests -v`
 
 ### Espacios de trabajo
@@ -23,13 +76,17 @@ python -m venv .venv-streamlit
 
 ### Experiencia visual y asistente
 
-La navegación incluye Inicio, Gemelo 3D, Investigación, Datos públicos y Asistente. Los controles de idioma (Español/English) y apariencia (Blanco/Negro) están en la barra lateral y se conservan durante la sesión. Los archivos JSON y los paneles identificados como datos originales conservan el idioma del motor.
+La navegación incluye Inicio, Guía para sustentar, Gemelo 3D, Investigación y Datos públicos. El asistente abre desde un círculo flotante. Los controles de idioma (Español/English) y apariencia (Blanco/Negro) están en la barra lateral. La ejecución de simulación y el entrenamiento se conservan al navegar durante la sesión. Los JSON, la traza, el protocolo y los paneles de datos originales conservan el idioma del motor.
 
 El gemelo 3D permite girar, acercar y recorrer los pasos del motor. Cada edificio representa un hogar estable y recibe su estado individual: expuesto, a salvo, atrapado o lesionado. Terreno y posiciones son esquemáticos, no georreferenciados. Una tabla alternativa muestra los mismos estados. No se presenta como reconstrucción satelital ni modelo físico validado.
 
 El asistente usa herramientas locales: explica métricas, consulta el contexto de entrenamiento y recalcula escenarios con 30 minutos más de alerta. Cita las ejecuciones utilizadas y admite preguntas en español o inglés. Es un asistente de alcance limitado, no un LLM generativo. No emplea credenciales ni envía conversaciones a terceros; conectar un modelo externo requiere autorización.
 
 Especificación de experiencia: [SPEC-experience-3d.md](./SPEC-experience-3d.md).
+
+### Exportar imágenes para informes
+
+En Gemelo 3D, usa **Exportar la vista 3D → Descargar PNG**. Elige 1920 o 3840 px; se captura la cámara, el instante y las capas actuales mediante un render nuevo e incluye una leyenda. En Investigación, cada histograma, matriz de correlaciones, ranking y gráfico real/predicho tiene botones **Descargar PNG** y **Descargar SVG**. SVG es vectorial y mantiene nitidez al ampliarlo. Los archivos incluyen título y procedencia; conservan el idioma y el tema actuales. Las dimensiones efectivas aparecen después de exportar.
 
 ### Método del laboratorio
 
@@ -214,3 +271,13 @@ La encuesta integrada conserva únicamente agregados y no solicita nombres, tel�
 ## Licencia
 
 Código bajo licencia MIT. Los datasets externos mantienen sus propias condiciones y deben revisarse antes de redistribuirlos.
+
+## Tablas, figuras y revisión del docente (26 de octubre de 2026)
+
+En el frontend React, cada tabla incluye **Descargar Excel**, explicación, interpretación y fuente. El archivo contiene las hojas **Datos** y **Lectura**; conserva los tipos numéricos y exporta todas las filas de esa tabla. Una vista previa de 30 filas exporta esas 30 filas, no el dataset completo. Los textos se escriben como valores literales, sin ejecutarlos como fórmulas.
+
+Las figuras de investigación y el gemelo 3D incluyen explicación e interpretación, también incorporadas a sus exportaciones de imagen. En **Guía → Revisión del docente · cumplimiento parcial** se encuentra una matriz exportable que relaciona las observaciones del informe con la evidencia y las tareas pendientes.
+
+El cumplimiento científico sigue siendo parcial: el R² de prueba es negativo, los intervalos bootstrap son condicionales y no sustituyen validación operativa, estudios con usuarios, estimación de potencia o revisión del manuscrito. Véase [el cotejo y sus verificaciones](docs/COTEJO-REVISION-Y-EXPORTACION-20261026.md).
+
+</details>

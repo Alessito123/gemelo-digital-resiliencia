@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 import requests
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from python_engine.models import WorkflowInput, WorkflowResult
@@ -178,3 +180,22 @@ def predict(run_id: str, payload: PredictionInput):
     value = float(max(0., np.expm1(estimator.predict(row)[0])))
     return PredictionResult(model=job["result"]["winner"], predicted_area_ha=value,
                             warning="Estimación experimental de área quemada; no extrapolar a resiliencia urbana.")
+
+
+# La compilación React se sirve desde el mismo origen; las rutas /api siguen
+# separadas y no existe un fallback que oculte errores de endpoints.
+FRONTEND_DIRECTORY = Path(__file__).resolve().parent / "dist"
+app.mount("/assets", StaticFiles(directory=FRONTEND_DIRECTORY / "assets", check_dir=False), name="react-assets")
+
+
+@app.get("/", include_in_schema=False)
+def react_home():
+    index = FRONTEND_DIRECTORY / "index.html"
+    if not index.is_file():
+        raise HTTPException(503, "Compile React con npm run build o use el servidor Vite de desarrollo.")
+    return FileResponse(index, headers={"Cache-Control": "no-store"})
+
+
+@app.get("/api-docs", include_in_schema=False)
+def api_docs():
+    return RedirectResponse("/docs")

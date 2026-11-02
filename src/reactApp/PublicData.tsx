@@ -1,0 +1,15 @@
+import {useRef,useEffect,useState,type FormEvent} from 'react';
+import {api,cities,download,type Snapshot} from './api';
+import {Heading,Note,Table,useText} from './ui';
+import {publicReading} from './readings';
+export default function PublicData(){const t=useText();const [city,setCity]=useState(cities[0][0]),[source,setSource]=useState('usgs'),[snapshot,setSnapshot]=useState<Snapshot|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);const controller=useRef<AbortController|null>(null);useEffect(()=>()=>controller.current?.abort(),[]);
+ async function fetchData(event:FormEvent){
+  event.preventDefault();controller.current?.abort();const c=new AbortController();controller.current=c;
+  setBusy(true);setSnapshot(null);setError('');
+  try{setSnapshot(await api<Snapshot>(`/public-data/${source}?settlement=${city}`,undefined,c.signal));}
+  catch(e){if(!c.signal.aborted)setError((e as Error).message);}
+  finally{if(!c.signal.aborted)setBusy(false);}
+ }
+ return <><Heading eyebrow={t('OBSERVATORIO / FUENTES PÚBLICAS','OBSERVATORY / PUBLIC SOURCES')} title={t('Datos con procedencia.','Data with provenance.')}>{t('Consulta sismos, precipitación y edificios cartografiados.','Explore earthquakes, precipitation and mapped buildings.')}</Heading>
+ <form onSubmit={fetchData}><div className="form-grid"><label>{t('Ciudad','City')}<select value={city} onChange={e=>setCity(e.target.value)}>{cities.map(([id,name])=><option value={id} key={id}>{name}</option>)}</select></label><label>{t('Fuente','Source')}<select value={source} onChange={e=>setSource(e.target.value)}><option value="usgs">USGS · {t('Sismos','Earthquakes')}</option><option value="nasa">NASA POWER · {t('Lluvia','Rainfall')}</option><option value="osm">OpenStreetMap · {t('Edificios','Buildings')}</option></select></label></div><button className="primary" disabled={busy}>{busy?t('Consultando…','Fetching…'):t('Consultar datos','Fetch data')}</button></form>{error?<Note error>{error}</Note>:null}<Note>{t('USGS: hasta 50 eventos en 150 km y diez años. NASA POWER: 30 días de un producto de grilla. OSM: edificios en una ventana aproximada. Ninguno identifica automáticamente asentamientos informales ni predice un desastre.','USGS: up to 50 events within 150 km over ten years. NASA POWER: 30 gridded-product days. OSM: buildings within an approximate window. None automatically identifies informal settlements or predicts a disaster.')}</Note>{snapshot?<><h2>{snapshot.settlement}</h2><small>{snapshot.retrieved_at} · {snapshot.license}</small><Table title={t('Registros públicos consultados','Queried public records')} source={`${snapshot.source} · ${snapshot.license} · ${snapshot.retrieved_at}`} {...publicReading(snapshot,t)} rows={snapshot.records}/>{/^https:\/\//.test(snapshot.source)?<a href={snapshot.source} target="_blank" rel="noreferrer">{t('Fuente original ↗','Original source ↗')}</a>:null}<button onClick={()=>download(snapshot,'public-data.json')}>{t('Descargar JSON','Download JSON')}</button></>:null}</>;
+}

@@ -1,6 +1,6 @@
 # Verificación de la entrega Python
 
-- 18 pruebas unittest aprobadas: simulación, LangGraph, observaciones vacías, particiones espaciales externas/internas, pipelines, contrastes, contratos HTTP, estados individuales, geometría 3D reproducible y asistente con herramientas.
+- 19 pruebas unittest aprobadas: simulación, LangGraph, observaciones vacías, particiones espaciales externas/internas, pipelines, contrastes, contratos HTTP, estados individuales, geometría 3D reproducible, inspección de hogares/cámaras y asistente con herramientas.
 - compileall: correcto.
 - pip check: sin dependencias incompatibles.
 - pip-audit del entorno completo: sin vulnerabilidades conocidas después de actualizar pip de 24.3.1 a 26.2.1. Esto no prueba ausencia de vulnerabilidades desconocidas.
@@ -15,6 +15,8 @@
 Limitaciones: pruebas de UI en escritorio; no certificación WCAG ni despliegue público multiusuario. El benchmark real de incendios no valida científicamente el gemelo urbano. Los modelos permanecen en memoria y deben entrenarse nuevamente tras reiniciar FastAPI; los informes JSON sí se conservan.
 
 ## Experiencia bilingüe y gemelo 3D
+
+Actualización de maqueta y sustentación: relieve con curvas de nivel, base de maqueta, tejados, ventanas, calles visuales opcionales, tres cámaras y localizador de hogares. La inspección y las capas no alteran los estados del motor. La guía ofrece diez accesos a requisitos con navegación hacia etapas y secciones. Verificada navegación de CRISP-DM y render 3D con Playwright; captura `output/playwright/twin-architectural-white.png`. La API local usa 8010 (configurable por `GEMELO_API_PORT`) para evitar interferir con otras aplicaciones en 8000/8001.
 
 - Asistente disponible desde un botón circular fijo en la esquina inferior derecha de todas las páginas. Popover nativo con conversación compartida, preguntas sugeridas y formulario; envío de «Explica los 5 folds» verificado mediante FastAPI (HTTP 200).
 

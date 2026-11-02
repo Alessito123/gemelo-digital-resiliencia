@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import numpy as np
@@ -22,6 +24,16 @@ def sample_frame():
 
 
 class ResearchTests(unittest.TestCase):
+    def test_react_entry_is_not_cached_across_deployments(self):
+        with TemporaryDirectory() as folder:
+            directory=Path(folder)
+            (directory/"index.html").write_text("<!doctype html><title>React fixture</title>",encoding="utf-8")
+            with patch("python_api.FRONTEND_DIRECTORY",directory):
+                response=TestClient(app).get("/")
+            self.assertEqual(response.status_code,200)
+            self.assertEqual(response.headers["cache-control"],"no-store")
+            self.assertIn("React fixture",response.text)
+
     def test_spatial_holdout_and_nested_folds_do_not_overlap(self):
         frame = sample_frame()
         development, test, groups = split_dataset(frame, 42)

@@ -22,6 +22,7 @@ def apply_design():
     p,label,[data-testid="stMarkdownContainer"],[data-testid="stCaptionContainer"],
     [data-testid="stMetricValue"],[data-testid="stMetricLabel"],[data-testid="stWidgetLabel"] {{color:{ink};}}
     [data-testid="stCaptionContainer"] p {{color:{muted}!important;}}
+    [data-testid="stCaptionContainer"] {{opacity:1!important;}}
     .eyebrow {{font:11px Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:{muted};margin-bottom:18px;}}
     .brand {{font:700 30px Georgia;letter-spacing:-1px;color:{ink};margin:0 0 4px;}}
     .brand-note {{font:10px Consolas;letter-spacing:.18em;color:{muted};margin-bottom:28px;}}
